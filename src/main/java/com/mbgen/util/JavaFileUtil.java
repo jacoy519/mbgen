@@ -3,10 +3,12 @@ package com.mbgen.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import com.mbgen.content.FileStaticContent;
 import com.mbgen.model.Dao;
 import com.mbgen.model.Do;
+import com.mbgen.model.Method;
 import com.mbgen.model.Properity;
 
 public class JavaFileUtil {
@@ -20,7 +22,7 @@ public class JavaFileUtil {
 			FileWriter fw = new FileWriter(file);
 			
 			fw.write("package "+doObj.getPackageName()+";"+FileStaticContent.RT_2);
-			fw.write("public class "+doObj.getClassName()+"Do"+FileStaticContent.BLANK_1+"{"+FileStaticContent.RT_2);
+			fw.write("public class "+doObj.getClassName()+FileStaticContent.BLANK_1+"{"+FileStaticContent.RT_2);
 			
 			for(Properity properity : doObj.getProperities()) {
 				fw.write(FileStaticContent.BLANK_4+"private "+properity.getType()+" "+properity.getName()+";"+FileStaticContent.RT_2);
@@ -60,6 +62,32 @@ public class JavaFileUtil {
 		File file=createJavaFile(dao.getClassName(),dao.getPackageName());
 		try {
 			FileWriter fw = new FileWriter(file);
+			
+			fw.write("package "+dao.getPackageName()+";"+FileStaticContent.RT_2);
+			
+			fw.write("import org.apache.ibatis.annotations.Param;"+FileStaticContent.RT_2);
+			
+			fw.write("public interface "+dao.getClassName()+FileStaticContent.BLANK_1+"{"+FileStaticContent.RT_2);
+			
+			for(Method method : dao.getMethods()) {
+				fw.write(FileStaticContent.BLANK_4+"public "+method.getReturnType()+" "+method.getMethodName()+"(");
+				List<Properity> properities=method.getProperities();
+				for(int i=0;properities!=null && i<properities.size();i++) {
+					Properity properity=properities.get(i);
+					fw.write("@Param(\""+properity.getName()+"\") ");
+					fw.write(properity.toString());
+					if(i!=(properities.size()-1)) {
+						fw.write(",");
+					}
+				}
+				fw.write(");"+FileStaticContent.RT_2);
+			}
+			
+			fw.write("}");
+
+			fw.flush();
+			fw.close();
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -76,7 +104,7 @@ public class JavaFileUtil {
 		for(String str :packageNames) {
 			sb.append(str+"/");
 		}
-		sb.append(className+"Do.java");
+		sb.append(className+".java");
 		return new File(sb.toString());
 		
 	}

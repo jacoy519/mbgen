@@ -12,7 +12,7 @@ public class Method {
 	
 	private List<Properity> properities;
 	
-	public Method(String methodName,String returnType,List<Properity> properities) {
+	public Method(String returnType,String methodName,List<Properity> properities) {
 		this.returnType=returnType;
 		this.methodName=methodName;
 		this.properities=properities;
@@ -37,7 +37,7 @@ public class Method {
 		sb.append(" ");
 		sb.append(StringUtil.captureName(methodName));
 		sb.append("(");
-		for(int i=0;i<properities.size();i++) {
+		for(int i=0;properities!=null && i<properities.size();i++) {
 			Properity properity=properities.get(i);
 			sb.append(properity.toString());
 			if(i!=(properities.size()-1)) {
