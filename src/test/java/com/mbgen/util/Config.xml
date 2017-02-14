@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config namespace="com.mbgen.model"
+
+	<datebase id="datasource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />  
+        <property name="url" value="jdbc:mysql://localhost:3306/blog?useUnicode=true&characterEncoding=utf8" />  
+        <property name="username" value="root"/>  
+        <property name="password" value="medivh519" />
+	</datebase>
+</config>
