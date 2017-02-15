@@ -1,5 +1,7 @@
 package com.mbgen.model;
 
+import java.util.Map;
+
 public class Database {
 	
 	private String url;
@@ -31,5 +33,19 @@ public class Database {
 	
 	public String getPassword() {
 		return this.password;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuffer str=new StringBuffer();
+		str.append("driver:"+driver);
+		str.append(",");
+		str.append("url:"+url);
+		str.append(",");
+		str.append("username:"+username);
+		str.append(",");
+		str.append("password:"+password);
+		return str.toString();
+		
 	}
 }

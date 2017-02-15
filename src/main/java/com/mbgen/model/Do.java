@@ -30,6 +30,6 @@ public class Do {
 	
 	@Override
 	public String toString(){
-		return packageName+className;
+		return packageName+"."+className;
 	}
 }

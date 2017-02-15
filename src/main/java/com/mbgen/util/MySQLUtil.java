@@ -39,7 +39,7 @@ public class MySQLUtil {
 	
 	public static String getJavaTypeFromMySqlType(String mySqlType) {
 		
-		if ("INT".equals(mySqlType)) {
+		if ("INTEGER".equals(mySqlType) || "INT".equals(mySqlType) ) {
 			return "int";
 		}
 		

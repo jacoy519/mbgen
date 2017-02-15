@@ -18,6 +18,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.mbgen.content.FileStaticContent;
+import com.mbgen.factory.DaoFactory;
+import com.mbgen.factory.DoFactory;
 import com.mbgen.model.Dao;
 import com.mbgen.model.Database;
 import com.mbgen.model.Do;
@@ -25,42 +27,6 @@ import com.mbgen.model.Method;
 import com.mbgen.model.Properity;
 
 public class JavaFileUtil {
-	
-	public static void createJavaFileFromXmlFile(String configXmlPath,String tableXmlPath) {
-		 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		 try {
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document config=db.parse(configXmlPath);
-			Document table=db.parse(tableXmlPath);
-			
-			Element configElement=config.getDocumentElement();
-			String namespace=configElement.getAttribute("namespace");
-			System.out.println("read namespace:"+namespace);
-			
-			NodeList dataBaseList=config.getElementsByTagName("database");
-			Database database=null;
-			Map<String,String> databaseProperityMap=new HashMap<String,String>();
-			for(int i=0;i<dataBaseList.getLength();i++) {
-				Element dataBaseNode=(Element)dataBaseList.item(i);
-				NodeList properityNodeList=dataBaseNode.getElementsByTagName("properity");
-				for(int j=0;j<dataBaseList.getLength();j++) {
-					Element properityElement=(Element)properityNodeList.item(j);
-					databaseProperityMap.put(properityElement.getAttribute("name"), properityElement.getAttribute("value"));
-				}
-			}
-			System.out.println(databaseProperityMap.toString());
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
 	
 	public static void createDoFile(Do doObj) {
 		System.out.println("create Do: "+doObj.toString());
