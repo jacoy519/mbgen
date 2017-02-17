@@ -4,12 +4,10 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.mbgen.model.Database;
-import com.mbgen.model.Do;
-import com.mbgen.model.Properity;
 import com.mysql.jdbc.Connection;
 
 
@@ -37,6 +35,27 @@ public class MySQLUtil {
 		return conn;
 	}
 	
+	public static Map<String,String> mapTableColumns(Database database,String table) {
+		Map<String,String> result=new LinkedHashMap<String,String>();
+		Connection connection=getConnection(database);
+		DatabaseMetaData dbMetaData;
+		try {
+			dbMetaData = connection.getMetaData();
+			ResultSet colRet = dbMetaData.getColumns(null, "%", table, "%");
+			while (colRet.next()) {
+				String columnName = colRet.getString("COLUMN_NAME");  
+				String columnType = colRet.getString("TYPE_NAME");
+				String ibatisType=StringUtil.getIbatisTypeFrormJdbcType(columnType);
+				result.put(columnName, ibatisType);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
+	
 	public static String getJavaTypeFromMySqlType(String mySqlType) {
 		
 		if ("INTEGER".equals(mySqlType) || "INT".equals(mySqlType) ) {
@@ -46,7 +65,7 @@ public class MySQLUtil {
 		if("VARCHAR".equals(mySqlType)) {
 			return "java.lang.String";
 		}
-		return null;
+		return mySqlType;
 	}
 	
 }

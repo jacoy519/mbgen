@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<config namespace="com.mbgen.model">
+<config namespace="com.blog">
 
 	<database id="datasource">
 		<property name="driver" value="com.mysql.jdbc.Driver" />  

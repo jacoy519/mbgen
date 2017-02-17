@@ -1,87 +1,93 @@
 package com.mbgen.factory;
 
-import java.io.IOException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.util.List;
+import java.util.Map;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
+import com.mbgen.context.ConfigContext;
+import com.mbgen.context.TableContext;
+import com.mbgen.model.Database;
+import com.mbgen.model.XMLModel;
+import com.mbgen.model.sql.SqlConfig;
+import com.mbgen.util.MySQLUtil;
+import com.mbgen.util.StringUtil;
 
 
 public class XmlFactory {
 	
-	private String configFile;
+	private ConfigContext configContext;
 	
-	private String tableFile;
+	private TableContext tableContext;
 	
-	public XmlFactory(String configFile,String tableFile) {
-		this.configFile=configFile;
-		this.tableFile=tableFile;
+	public XmlFactory(ConfigContext configContext, TableContext tableContext) {
+		this.configContext=configContext;
+		this.tableContext=tableContext;
 	}
 	
-	public Document getXML() {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		Document doc=null;
-		try {
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document config=db.parse(configFile);
-			Document table=db.parse(tableFile);
-			
-			Element configElement=config.getDocumentElement();
-			String packageName=configElement.getAttribute("namespace");
-			
-			Element tableElement=table.getDocumentElement();
-			String tableName=tableElement.getAttribute("name");
-			
-			String doName=packageName+".pojo."+tableName+"Do";
-			String daoName=packageName+".dao"+tableName+"Dao";
-			
-			//开始写Xml
-			doc=db.newDocument();
-			
-			//创建mapper元素
-			Element mapper=doc.createElement("mapper");
-			mapper.setAttribute("namespace", daoName);
-			doc.appendChild(mapper);
-			
-			//创建ElementSql语句
-			String[] methodTags={"select","delete","update","insert"};
-			for(String methodTag: methodTags) {
-				NodeList methodNodeList=tableElement.getElementsByTagName(methodTag);
-				for(int i=0;i<methodNodeList.getLength();i++) {
-					Element methodMapperEle=doc.createElement(methodTag);
-					
-					Element methodElement=(Element) methodNodeList.item(i);
-					String id=methodElement.getAttribute("id");
-					methodMapperEle.setAttribute("id",id);
-					
-					Element sqlElement=(Element)methodElement.getElementsByTagName("sql").item(0);
-					String sql=sqlElement.getTextContent();
-					methodMapperEle.setNodeValue(sql);
-					
-					if("select".equals(methodTag)) {
-						methodMapperEle.setAttribute("resultType",doName);
-					}
-					
-					mapper.appendChild(methodMapperEle);
-				}
-			}
+	public XMLModel getXMLModel() {
 		
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		String packageName=tableContext.getNameSpace();
+		String tableName=tableContext.getTableName();
+		String doType=tableContext.getDoName();
+		String daoType=tableContext.getDaoName();
+		
+		Document doc=DocumentHelper.createDocument();
+		
+		//添加docType
+		doc.addDocType("mapper", "-//mybatis.org//DTD Mapper 3.0//EN","http://mybatis.org/dtd/mybatis-3-mapper.dtd");
+		
+		//添加mapper元素
+		Element mapper=doc.addElement("mapper");
+		mapper.addAttribute("namespace", daoType);
+		
+		//添加resultMap元素
+		Element resultMap=mapper.addElement("resultMap");
+		String resultMapId=StringUtil.captureName(tableName)+"ResultMap";
+		resultMap.addAttribute("id", resultMapId);
+		resultMap.addAttribute("type", doType);
+		
+		Database dataBase=configContext.getDataBaseFromConfig();
+		Map<String,String> tableColumns=MySQLUtil.mapTableColumns(dataBase, tableName);
+		
+		Boolean idSet=false;
+		for(Map.Entry<String, String> tableColumn : tableColumns.entrySet()) {
+			String elementType="result";
+			
+			if(!idSet) {
+				idSet=true;
+				elementType="id";
+			}
+			
+			Element result=resultMap.addElement(elementType);
+			result.addAttribute("column", tableColumn.getKey());
+			result.addAttribute("property", StringUtil.getJavaVariableStr(tableColumn.getKey()));
+			result.addAttribute("jdbcType", tableColumn.getValue());
 		}
 		
-		return doc;
+		
+		//添加sql语句元素
+		List<SqlConfig> sqlConfigs=tableContext.listSqlConfigs();
+		for(SqlConfig sqlConfig:sqlConfigs) {
+			
+			 Element sqlElement=mapper.addElement(sqlConfig.getType());
+			 sqlElement.addAttribute("id", sqlConfig.getId());
+			 
+			 if("select".equals(sqlConfig.getType())) {
+				 sqlElement.addAttribute("resultMap", resultMapId);
+			 }
+			 
+			 sqlElement.addText(sqlConfig.getSqlCommand());
+			 
+		}
+		
+		String mapperPackageName=packageName+".mapping";
+		
+		String fileName=StringUtil.captureName(tableName)+"DoMapper";		
+		
+		return new XMLModel(mapperPackageName,fileName,doc);
 	}
 }

@@ -3,30 +3,32 @@ package com.mbgen.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
+import org.dom4j.io.XMLWriter;
 import com.mbgen.content.FileStaticContent;
-import com.mbgen.factory.DaoFactory;
-import com.mbgen.factory.DoFactory;
 import com.mbgen.model.Dao;
-import com.mbgen.model.Database;
 import com.mbgen.model.Do;
 import com.mbgen.model.Method;
 import com.mbgen.model.Properity;
+import com.mbgen.model.XMLModel;
 
-public class JavaFileUtil {
+public class FileUtil {
+	
+	public static void createXmlFile(XMLModel xmlModel) {
+		
+		File xmlFile=createXmlFile(xmlModel.getFileName(),xmlModel.getPackageName());
+		try {
+			XMLWriter output=new XMLWriter(new FileWriter(xmlFile));
+			output.write(xmlModel.getDoc());
+			output.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 	public static void createDoFile(Do doObj) {
 		System.out.println("create Do: "+doObj.toString());
@@ -47,10 +49,10 @@ public class JavaFileUtil {
 				
 				String type=properity.getType();
 				String name=properity.getName();
-				String UpperCaseName=captureName(name);
+				String UpperCaseName=StringUtil.captureName(name);
 				
 				//生成get方法
-				fw.write(FileStaticContent.BLANK_4+"public "+type+" get"+UpperCaseName+"("+type+" "+name+") {"+FileStaticContent.RT_1);
+				fw.write(FileStaticContent.BLANK_4+"public "+type+" get"+UpperCaseName+"() {"+FileStaticContent.RT_1);
 				fw.write(FileStaticContent.BLANK_8+"return this."+name+";"+FileStaticContent.RT_1);
 				fw.write(FileStaticContent.BLANK_4+"}"+FileStaticContent.RT_2);
 				
@@ -110,22 +112,40 @@ public class JavaFileUtil {
 		
 	}
 	
+	
+	
 	private static File createJavaFile(String className,String packageName) {
+		String filePath=getFilePath(packageName);
+		String fullFileName=filePath+className+".java";
+		return new File(fullFileName);
+	}
+	
+	private static File createXmlFile(String className,String packageName) {
+		String filePath=getFilePath(packageName);
+		String fullFileName=filePath+className+".xml";
+		return new File(fullFileName);
+	}
+	
+	
+	private static String getFilePath(String packageName) {
 		StringBuffer sb=new StringBuffer();
-		sb.append( System.getProperty("user.dir"));
+		//sb.append( System.getProperty("user.dir"));
+		File directory = new File(".."); 
+		String path="";
+		try {
+			path = directory.getCanonicalPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sb.append( path);
 		sb.append("/src/main/java/");
 		
 		String[] packageNames=packageName.split("\\.");
 		for(String str :packageNames) {
 			sb.append(str+"/");
 		}
-		sb.append(className+".java");
-		return new File(sb.toString());
+		return sb.toString();
 		
-	}
-	
-	private static String captureName(String name){
-		name=name.substring(0,1).toUpperCase()+name.substring(1);
-		return name;
 	}
 }

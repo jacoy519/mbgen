@@ -1,6 +1,5 @@
 package com.mbgen.model;
 
-import java.util.Map;
 
 public class Database {
 	
