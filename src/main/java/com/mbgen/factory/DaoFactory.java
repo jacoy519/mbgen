@@ -34,7 +34,7 @@ public class DaoFactory {
 	}
 	
 	private Method getDaoMethod(SqlConfig sqlConfig) {
-		String returnType="void";
+		String returnType="int";
 		String resultAttr=sqlConfig.getResultType();
 		if("single".equals(resultAttr)) {
 			returnType=tableContext.getDoName();
