@@ -7,6 +7,8 @@ public class StringUtil {
 		return name;
 	}
 	
+
+	
 	public static String getJavaVariableStr(String input) {
 		String[] names=input.split("_");
         
@@ -27,5 +29,29 @@ public class StringUtil {
 		}
 		
 		return jdbcType;
+	}
+	
+	
+	public static String getJavaClassDoName(String input) {
+		return removeUnderLineAndCaptureStr(input)+"Do";
+	}
+	
+	public static String getJavaClassDaoName(String input) {
+		return removeUnderLineAndCaptureStr(input)+"Dao";
+	}
+	
+	public static String getMapperFileName(String input) {
+		return removeUnderLineAndCaptureStr(input)+"DoMapper";
+	}
+	
+	private static String removeUnderLineAndCaptureStr(String input){
+		String[] names=input.split("_");
+        
+        StringBuffer strb=new StringBuffer();
+        for(int i=0;i<names.length;i++) {
+        	names[i]=StringUtil.captureName(names[i]);
+        	strb.append(names[i]);
+        }
+        return strb.toString();
 	}
 }

@@ -30,7 +30,7 @@ public class TableContext {
 	
 	public String getDoSimpleName() {
 		String tableName=getTableName();
-		return StringUtil.captureName(tableName)+"Do";
+		return StringUtil.getJavaClassDoName(tableName);
 	}
 	
 	public String getDoPackageName() {
@@ -45,7 +45,7 @@ public class TableContext {
 	
 	public String getDaoSimpleName() {
 		String tableName=getTableName();
-		return StringUtil.captureName(tableName)+"Dao";
+		return StringUtil.getJavaClassDaoName(tableName);
 	}
 	
 	public String getDaoPackageName() {

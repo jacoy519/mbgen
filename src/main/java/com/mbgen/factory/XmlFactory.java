@@ -86,7 +86,7 @@ public class XmlFactory {
 		
 		String mapperPackageName=packageName+".mapping";
 		
-		String fileName=StringUtil.captureName(tableName)+"DoMapper";		
+		String fileName=StringUtil.getMapperFileName(tableName);		
 		
 		return new XMLModel(mapperPackageName,fileName,doc);
 	}
